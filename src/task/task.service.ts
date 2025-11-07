@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Task } from './entities/task.entity';
 import { Category } from '../category/entities/category.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
 
 @Injectable()
 export class TaskService {
@@ -48,7 +49,7 @@ export class TaskService {
     return task;
   }
 
-  async markAsCompleted(id: number, updateTaskDto) {
+  async update(id: number, updateTaskDto) {
     const task = await this.taskRepository.findOne({
       where: { id },
       relations: ['category'],
@@ -57,7 +58,32 @@ export class TaskService {
       throw new NotFoundException(`Task with ID ${id} not found`);
     }
 
-    task.isCompleted = updateTaskDto.isCompleted;
+    const category = await this.categoryRepository.findOne({
+      where: { id: updateTaskDto.categoryId },
+    });
+    if (!category) {
+      throw new NotFoundException(`
+        Category with ID ${updateTaskDto.categoryId} not found`);
+    }
+
+    task.title = updateTaskDto.title;
+    task.description = updateTaskDto.description;
+    task.dueDate = updateTaskDto.dueDate;
+    task.category = updateTaskDto.categoryId;
+
+    return this.taskRepository.save(task);
+  }
+
+  async markAsCompleted(id: number) {
+    const task = await this.taskRepository.findOne({
+      where: { id },
+      relations: ['category'],
+    });
+    if (!task) {
+      throw new NotFoundException(`Task with ID ${id} not found`);
+    }
+
+    task.isCompleted = true;
     return this.taskRepository.save(task);
   }
 
