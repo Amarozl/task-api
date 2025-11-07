@@ -35,12 +35,14 @@ export class TaskController {
     return this.taskService.findByCategory(+id);
   }
 
+  @Patch(':id/update')
+  update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
+    return this.taskService.update(+id, updateTaskDto);
+  }
+
   @Patch(':id/complete')
-  markAsCompleted(
-    @Param('id') id: string,
-    @Body() updateTaskDto: UpdateTaskDto,
-  ) {
-    return this.taskService.markAsCompleted(+id, updateTaskDto);
+  markAsCompleted(@Param('id') id: string) {
+    return this.taskService.markAsCompleted(+id);
   }
 
   @Delete(':id')
